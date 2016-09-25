@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">UWGPA</string>
+    <string name="app_name">UW-GPA</string>
 
     <string name="questid">Quest ID</string>
     <string name="login">Login</string>
-    <string name="disclaimer">Your login credentials will only be used to login to Quest. For the security concerns they will not be stored, you will have to re-enter your credentials each time.</string>
+    <string name="disclaimer">Your login credentials will only be used to login to Quest. For security concerns they will not be stored, you will have to re-enter your credentials each time.</string>
+    <string name="hi">Hi</string>
+    <string name="title_activity_grade">GradeActivity</string>
 </resources>

@@ -15,32 +15,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="@string/questid"
             android:ems="10"
             android:id="@+id/IDText"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="131dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:hint="@string/questid" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/editText2"
+            android:id="@+id/PswdText"
             android:layout_below="@+id/IDText"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:hint="Password" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/login"
             android:id="@+id/loginButton"
-            android:layout_below="@+id/editText2"
-            android:layout_centerHorizontal="true" />
+            android:layout_below="@+id/PswdText"
+            android:layout_centerHorizontal="true"
+            android:onClick="login" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,4 +55,14 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/loginButton" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="UW GPA"
+            android:id="@+id/textView"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="55dp" />
 </RelativeLayout>
