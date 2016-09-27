@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GradeActivity extends AppCompatActivity {
-    ArrayList<String> gradeItems;
+    ArrayList<GradeItem> gradeItems;
     private String html;
     ArrayAdapter gradeAdapter;
 
@@ -36,7 +36,7 @@ public class GradeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            gradeItems=extras.getStringArrayList("grades");
+            gradeItems=extras.getParcelableArrayList("grades");
             //gradeParsing();
             Log.d("oncreate","grade parsed");
             if (gradeItems==null){
@@ -46,7 +46,7 @@ public class GradeActivity extends AppCompatActivity {
         else{
             Log.d("oncreate","null html at grade");
         }
-        gradeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, gradeItems);
+        gradeAdapter = new GradeAdapter(this,gradeItems);
         ListView gradeListView = (ListView) findViewById(R.id.gradeList);
         gradeListView.setAdapter(gradeAdapter);
         gradeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -78,13 +78,8 @@ public class GradeActivity extends AppCompatActivity {
                 //aDB.setMessage("Enter subject and grade below");
                 aDB.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        StringBuilder sb=new StringBuilder(subjectEdt.getText().toString());
                         String grade = gradeEdt.getText().toString();
-                        sb.append(": ");
-                        sb.append(grade);
-                        sb.append("\t\t");
-                        sb.append(GPAConvert.convert(grade));
-                        gradeItems.add(0,sb.toString());
+                        gradeItems.add(new GradeItem(subjectEdt.getText().toString(),grade,GPAConvert.convert(grade)));
                         gradeAdapter.notifyDataSetChanged();
                     }
                 });
@@ -102,9 +97,9 @@ public class GradeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 double total=0;
                 int items=0;
-                for (String grade : gradeItems){
+                for (GradeItem grade : gradeItems){
                     try {
-                        double gpa = Double.parseDouble(grade.substring(grade.indexOf("\t\t")));
+                        double gpa = Double.parseDouble(grade.getGPA());
                         total += gpa;
                         items++;
                     }
@@ -126,18 +121,18 @@ public class GradeActivity extends AppCompatActivity {
         aDB.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //operate on the list... this is not good.
-                String pattern = "^.* [0-9]{3}:";
+                String pattern = "^.* [0-9]{3}$";
                 Pattern r = Pattern.compile(pattern);
-                ArrayList<String> newGradeItems=new ArrayList<String>();
-                for (String gradeItem: gradeItems){ //difficult to do this in-place
+                ArrayList<GradeItem> newGradeItems=new ArrayList<>();
+                for (GradeItem gradeItem: gradeItems){ //difficult to do this in-place
                     //Log.d("regex","trying "+gradeItem);
-                    if (r.matcher(gradeItem).find()){
+                    if (r.matcher(gradeItem.getCourseCode()).find()){
                         newGradeItems.add(gradeItem);
                         //Log.d("regex","matched "+gradeItem);
                     }
                 }
                 gradeItems.clear();
-                for (String gradeItem: newGradeItems){
+                for (GradeItem gradeItem: newGradeItems){
                     gradeItems.add(gradeItem);
                 }
                 gradeAdapter.notifyDataSetChanged();

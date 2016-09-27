@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_trending_up_black_24dp"
         android:id="@+id/calcAvg" />
@@ -47,21 +47,21 @@
         android:id="@+id/fab_invisible"
         android:layout_width="@dimen/fab_margin"
         android:layout_height="@dimen/fab_margin"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:visibility="invisible"
         app:layout_anchor="@id/calcAvg"
-        app:layout_anchorGravity="top" />
+        app:layout_anchorGravity="right" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/addGrade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_black_24dp"
+        app:srcCompat="@drawable/ic_add_black_24dp"
         app:layout_anchor="@id/fab_invisible"
-        app:layout_anchorGravity="top" />
+        app:layout_anchorGravity="right" />
 
 
 </android.support.design.widget.CoordinatorLayout>

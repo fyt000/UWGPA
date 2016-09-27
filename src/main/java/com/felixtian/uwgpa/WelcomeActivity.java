@@ -18,7 +18,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private TextView welcomeView;
     private ProgressDialog waitDialog;
     private String html;
-    private static final ArrayList<String> gradeItems = new ArrayList<>();
+    private static final ArrayList<GradeItem> gradeItems = new ArrayList<>();
     private static int index=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class WelcomeActivity extends AppCompatActivity {
                     waitDialog.dismiss();
                     Intent i = new Intent(getApplicationContext(), GradeActivity.class);
                     Log.d("oncreate",gradeItems.size()+"");
-                    i.putStringArrayListExtra("grades", gradeItems);
+                    i.putParcelableArrayListExtra("grades", gradeItems);
                     startActivity(i);
                     return; //in case it doesn't
                 }
@@ -98,7 +98,7 @@ public class WelcomeActivity extends AppCompatActivity {
             String courseGrade = dumbScraper.scrape(courseGradeP1,courseGradeP2);
             if (courseGrade.equals("&nbsp;"))
                 courseGrade="";
-            gradeItems.add(courseID+": "+courseGrade+"\t\t"+GPAConvert.convert(courseGrade));
+            gradeItems.add(new GradeItem(courseID,courseGrade,GPAConvert.convert(courseGrade)));
         }
     }
     private void backToLoginDialog(){
