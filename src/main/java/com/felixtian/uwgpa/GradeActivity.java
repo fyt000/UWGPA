@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 public class GradeActivity extends AppCompatActivity {
     ArrayList<GradeItem> gradeItems;
-    private String html;
     ArrayAdapter gradeAdapter;
 
 
@@ -34,17 +33,10 @@ public class GradeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grade);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             gradeItems=extras.getParcelableArrayList("grades");
-            //gradeParsing();
-            Log.d("oncreate","grade parsed");
-            if (gradeItems==null){
-                Log.d("oncreate","go do grocery and eat lunch please");
-            }
-        }
-        else{
-            Log.d("oncreate","null html at grade");
         }
         gradeAdapter = new GradeAdapter(this,gradeItems);
         ListView gradeListView = (ListView) findViewById(R.id.gradeList);
@@ -79,7 +71,7 @@ public class GradeActivity extends AppCompatActivity {
                 aDB.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String grade = gradeEdt.getText().toString();
-                        gradeItems.add(new GradeItem(subjectEdt.getText().toString(),grade,GPAConvert.convert(grade)));
+                        gradeItems.add(0,new GradeItem(subjectEdt.getText().toString(),grade,GPAConvert.convert(grade)));
                         gradeAdapter.notifyDataSetChanged();
                     }
                 });
@@ -117,7 +109,7 @@ public class GradeActivity extends AppCompatActivity {
     public void filter(View v){
         AlertDialog.Builder aDB = new AlertDialog.Builder(GradeActivity.this);
         aDB.setTitle("Filter");
-        aDB.setMessage("This will delete courses without a proper course code.");
+        aDB.setMessage("This will remove courses without a proper course code.");
         aDB.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //operate on the list... this is not good.
@@ -125,10 +117,8 @@ public class GradeActivity extends AppCompatActivity {
                 Pattern r = Pattern.compile(pattern);
                 ArrayList<GradeItem> newGradeItems=new ArrayList<>();
                 for (GradeItem gradeItem: gradeItems){ //difficult to do this in-place
-                    //Log.d("regex","trying "+gradeItem);
                     if (r.matcher(gradeItem.getCourseCode()).find()){
                         newGradeItems.add(gradeItem);
-                        //Log.d("regex","matched "+gradeItem);
                     }
                 }
                 gradeItems.clear();
