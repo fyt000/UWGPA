@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -37,6 +38,11 @@ public class WelcomeActivity extends AppCompatActivity {
         else{
             backToLoginDialog();
         }
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //I commented out this line what do you want?
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
     public void getGrades(View view){
@@ -54,6 +60,11 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void postExecute(ResponseData r){
                 DumbScraper dumbScraper = new DumbScraper(r.responseContent);
+                String loggedOff = dumbScraper.scrape("id=\"login\" name=\"login\"","document.login");
+                if (!loggedOff.equals("")){
+                    backToLoginDialog();
+                    return;
+                }
                 String result =dumbScraper.scrape("'TERM_CAR$"+index,"<!-- TERM_CAR$"+index);
                 Log.d("oncreate","checking "+index);
                 if (result.equals("")){
@@ -74,6 +85,13 @@ public class WelcomeActivity extends AppCompatActivity {
                         }
                         public void postExecute(ResponseData r){
                             Log.d("oncreate","post execute at "+index);
+                            DumbScraper dumbScraper = new DumbScraper(r.responseContent);
+                            String loggedOff = dumbScraper.scrape("id=\"login\" name=\"login\"","document.login");
+                            if (!loggedOff.equals("")){
+                                backToLoginDialog();
+                                return;
+                            }
+
                             gradeParsing(r.responseContent);
                             index++;
                             getGradesX(r.responseContent);
