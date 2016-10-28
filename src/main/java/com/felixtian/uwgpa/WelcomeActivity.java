@@ -4,14 +4,14 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -41,16 +41,51 @@ public class WelcomeActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //I commented out this line what do you want?
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
+    private class AsyncPullGrade extends AsyncTask<Void,Void,ArrayList<GradeItem>>{
+        @Override
+        protected ArrayList<GradeItem> doInBackground(Void... params) {
+            return  GradeNotificationService.pullGrade();
+        }
+        protected void onPostExecute(ArrayList<GradeItem> curGrade) {
+            waitDialog.dismiss();
+            Intent i = new Intent(getApplicationContext(), CurGradeActivity.class);
+            Log.d("oncreate",curGrade.size()+"");
+            setBaseLine(curGrade);
+            i.putParcelableArrayListExtra("grades", curGrade);
+            startActivity(i);
+        }
+    }
+    public void setBaseLine(ArrayList<GradeItem> grades){
+        if (grades==null)
+            return;
+        //clear all
+        SharedPreferences sharedPref = getSharedPreferences(GradeNotificationService.GradePrefName, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear();editor.commit();
+
+        //store the current stuff
+        for (GradeItem grade : grades) {
+            if (!grade.getGrade().equals("")) {
+                editor.putString(grade.getCourseCode(), grade.getGrade());
+            }
+        }
+        editor.commit();
+    }
+    public void curGrade(View view){
+        waitDialog.setMessage("Fetching grade...");
+        waitDialog.show();
+        new AsyncPullGrade().execute();
+
+    }
+
     public void getGrades(View view){
         waitDialog.setMessage("Fetching grade...");
         waitDialog.show();
-        getGradesX(html);
+        getGrades();
     }
-    private void getGradesX(String curHtml){
+    private void getGrades(){
 
         String url="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";
         PostRequest post1 = (PostRequest) new PostRequest(new PostRequest.AsyncCallBack(){
@@ -91,17 +126,17 @@ public class WelcomeActivity extends AppCompatActivity {
                                 backToLoginDialog();
                                 return;
                             }
-
-                            gradeParsing(r.responseContent);
+                            gradeItems.addAll(gradeParsing(r.responseContent));
                             index++;
-                            getGradesX(r.responseContent);
+                            getGrades();
                         }
                     }).execute(url,postData.toString(),"POST");
                 }
             }
         }).execute(url,"","GET");
     }
-    private void gradeParsing(String html){
+    public static ArrayList<GradeItem> gradeParsing(String html){
+        ArrayList<GradeItem> grades = new ArrayList<GradeItem>();
         for (int i=0;i<10;i++) { //assume you have a max of 10 courses right now
             String courseIDP1=String.format("'CLS_LINK$%d');\"  class='PSHYPERLINK' >",i);
             String courseIDP2=String.format("</a></span>");
@@ -116,8 +151,9 @@ public class WelcomeActivity extends AppCompatActivity {
             String courseGrade = dumbScraper.scrape(courseGradeP1,courseGradeP2);
             if (courseGrade.equals("&nbsp;"))
                 courseGrade="";
-            gradeItems.add(new GradeItem(courseID,courseGrade,GPAConvert.convert(courseGrade)));
+            grades.add(new GradeItem(courseID,courseGrade,GPAConvert.convert(courseGrade)));
         }
+        return grades;
     }
     private void backToLoginDialog(){
         AlertDialog alertDialog = new AlertDialog.Builder(this).create();
@@ -135,4 +171,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 });
         alertDialog.show();
     }
+    public void curGrade(){
+        //pull grade, wrap it in async task
+        //send it to a new CurGradeActivity
+    }
+
 }

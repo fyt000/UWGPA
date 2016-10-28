@@ -6,4 +6,9 @@
     <string name="disclaimer">Your login credentials will only be used to login to Quest. For security concerns they will not be stored, you will have to re-enter your credentials each time.</string>
     <string name="hi">Hi</string>
     <string name="title_activity_grade">GradeActivity</string>
+    <string name="notification_disclaimer">Your password will not be stored in any persistent storage.
+        Please keep this app running in the background. The app will try to pull your grades and check for an update every 30 minutes.
+        You will be notified to re-login if you or the system killed the app - in which the password will be lost.
+        If you are done with the grades please click stop notification to turn off the service and save some battery. </string>
+    <string name="grade_notification_btn">Current Grade &amp; Notification</string>
 </resources>

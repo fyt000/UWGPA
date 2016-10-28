@@ -14,17 +14,8 @@
     android:layout_centerVertical="true"
     android:layout_centerHorizontal="true"
     android:adjustViewBounds="false"
-    android:onClick="getGrades" />
-
-    <TextView
-        android:text="Tap to get your grades"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/welcomeView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/instruction"
-        android:paddingLeft="16dp" />
+    android:onClick="getGrades"
+        android:id="@+id/imageButton" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -54,6 +45,27 @@
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
+
+    <Button
+        android:text="@string/grade_notification_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button4"
+        android:background="@color/colorAccent"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="74dp"
+        android:onClick="curGrade" />
+
+    <TextView
+        android:text="Tap to get all of your grades and compute GPA"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/instruction"
+        android:paddingLeft="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
 

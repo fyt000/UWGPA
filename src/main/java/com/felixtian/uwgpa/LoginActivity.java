@@ -64,6 +64,8 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d("post","Req2 "+r.responseCode+"");
                         //I could put more stuff into ResponseData like new location header and check for error params
                         if (r.responseContent.indexOf("DERIVED_SSTSNAV_PERSON_NAME")!=-1){
+                            GradeNotificationService.password=pswdView.getText().toString();
+                            GradeNotificationService.username=userIDView.getText().toString().toUpperCase();
                             //usually this is good
                             Intent i = new Intent(getApplicationContext(), WelcomeActivity.class);
                             i.putExtra("html",r.responseContent); //lets just pass the whole thing over
