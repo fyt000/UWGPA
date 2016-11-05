@@ -6,17 +6,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     tools:context="com.felixtian.uwgpa.WelcomeActivity">
 
-    <ImageButton
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
-    android:src="@drawable/roundbtn"
-    android:layout_centerVertical="true"
-    android:layout_centerHorizontal="true"
-    android:adjustViewBounds="false"
-    android:onClick="getGrades"
-        android:id="@+id/imageButton" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,24 +37,31 @@
 
     <Button
         android:text="@string/grade_notification_btn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/button4"
-        android:background="@color/colorAccent"
-        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary"
+        android:onClick="curGrade"
+        android:layout_below="@+id/button2"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="74dp"
-        android:onClick="curGrade" />
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="@color/colorAccent" />
 
-    <TextView
-        android:text="Tap to get all of your grades and compute GPA"
+    <Button
+        android:text="List all GPA"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/instruction"
-        android:paddingLeft="16dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_height="wrap_content"
+        android:id="@+id/button2"
+        android:layout_marginTop="166dp"
+        android:background="@color/colorPrimary"
+        android:onClick="getGrades"
+        android:layout_below="@+id/welcomeView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="@color/colorAccent" />
 
 </RelativeLayout>
 

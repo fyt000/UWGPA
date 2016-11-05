@@ -23,34 +23,35 @@
         android:id="@+id/gradeTextView"
         android:textSize="18sp" />
 
-    <Button
-        android:text="Send Notification on Update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/button2"
-        android:onClick="pollGrades" />
-
-    <Button
-        android:text="Stop Notification"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView3"
-        android:layout_marginBottom="20dp"
-        android:id="@+id/button3"
-        android:onClick="cancelPoll"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView3"
         tools:text="@string/notification_disclaimer"
-        android:layout_marginBottom="27dp"
         android:text="@string/notification_disclaimer"
-        android:layout_below="@+id/button2"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/curGradeList"
+        android:layout_marginTop="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"></ListView>
+
+    <Switch
+        android:text="Notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/notificationSwitch"
+        android:layout_marginRight="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_alignBaseline="@+id/gradeTextView"
+        android:layout_alignBottom="@+id/gradeTextView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

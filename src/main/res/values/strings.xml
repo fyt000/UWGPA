@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">UW-GPA</string>
+    <string name="app_name">UW GPA</string>
 
     <string name="questid">Quest ID</string>
     <string name="login">Login</string>
