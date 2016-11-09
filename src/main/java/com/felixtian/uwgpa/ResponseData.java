@@ -7,8 +7,12 @@ package com.felixtian.uwgpa;
 public class ResponseData {
     public String responseContent;
     public int responseCode;
+    public boolean passed; //if we needed this for whatever reason
     public ResponseData(int code,String content){
         responseCode=code;responseContent=content;
+    }
+    public ResponseData(int code,String content,boolean passed){
+        responseCode=code;responseContent=content;this.passed=passed;
     }
     public boolean isSuccess(){
         //not sure if I should consider 3xx as failure

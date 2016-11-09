@@ -1,8 +1,12 @@
 package com.felixtian.uwgpa;
 
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
@@ -15,7 +19,7 @@ import java.util.ArrayList;
 public class CurGradeActivity extends AppCompatActivity {
     ArrayAdapter gradeAdapter;
     private Switch notificationSwitch;
-    private TextView gradeView;
+    //private TextView gradeView;
     ArrayList<GradeItem> gradeList;
 
 
@@ -24,7 +28,7 @@ public class CurGradeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cur_grade);
         Bundle extras = getIntent().getExtras();
-        gradeView = (TextView)findViewById(R.id.gradeTextView);
+        //gradeView = (TextView)findViewById(R.id.gradeTextView);
         if (extras != null) {
             gradeList=extras.getParcelableArrayList("grades");
 
@@ -41,25 +45,45 @@ public class CurGradeActivity extends AppCompatActivity {
             notificationSwitch.setChecked(true);
         else
             notificationSwitch.setChecked(false);
+        Log.d("notificationswitch",running+"");
+
 
         notificationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                    pollGrades();
+                if(isChecked) {
+                    AlertDialog.Builder aDB=new AlertDialog.Builder(CurGradeActivity.this);
+                    aDB.setMessage( getResources().getString(R.string.notification_disclaimer));
+                    aDB.setNegativeButton("Cancel", new AlertDialog.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            notificationSwitch.setChecked(false);
+                        }});
+                    aDB.setPositiveButton("Ok", new AlertDialog.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            pollGrades();
+                        }});
+                    aDB.show();
+
+                }
                 else
                     cancelPoll();
             }
         });
+        Toolbar toolbar = (Toolbar) findViewById(R.id.curGradeToolbar);
+        setSupportActionBar(toolbar);
     }
     public void pollGrades(){
         SharedPreferences sharedPref = getSharedPreferences(GradeNotificationService.GradePrefName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         int running=sharedPref.getInt("running",0);
+        Log.d("notificationswitch","pollgrades "+running);
         if (running==1)
             GradeNotificationReceiver.cancel(this);
-        else
-            editor.putInt("running",1);
+        else {
+            Log.d("notificationswitch","putting 1");
+            editor.putInt("running", 1);
+        }
+        editor.commit();
         //poll grades on 30min interval right away, will add a new activity for configs.
         GradeNotificationReceiver.initialize(this,1);
     }
@@ -67,6 +91,8 @@ public class CurGradeActivity extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences(GradeNotificationService.GradePrefName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("running",0);
+        Log.d("notificationswitch","putting 0");
+        editor.commit();
         GradeNotificationReceiver.cancel(this);
     }
 

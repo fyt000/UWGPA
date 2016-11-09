@@ -6,25 +6,41 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.ArrayList;
 
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     private TextView welcomeView;
     private ProgressDialog waitDialog;
     private String html;
     private static final ArrayList<GradeItem> gradeItems = new ArrayList<>();
     private static int index=0;
+    private GoogleApiClient mGoogleApiClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .enableAutoManage(this, 0, this)
+                .addApi(Auth.CREDENTIALS_API)
+                .build();
 
         welcomeView=(TextView) findViewById(R.id.welcomeView);
         waitDialog=new ProgressDialog(this);
@@ -32,17 +48,37 @@ public class WelcomeActivity extends AppCompatActivity {
         if (extras != null) {
             html = extras.getString("html");
             DumbScraper scraper1 = new DumbScraper(html);
-            welcomeView.setText("Welcome, "+scraper1.scrape("id='DERIVED_SSTSNAV_PERSON_NAME'>","</span>"));
+            welcomeView.setText("Hello, "+scraper1.scrape("id='DERIVED_SSTSNAV_PERSON_NAME'>","</span>"));
             Log.d("parse",scraper1.scrape("<title id='PSPAGETITLE'>","</title>"));
         }
         else{
             backToLoginDialog();
         }
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.welcomeToolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar2);
+        //setSupportActionBar(toolbar);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
     private class AsyncPullGrade extends AsyncTask<Void,Void,ArrayList<GradeItem>>{
         @Override
         protected ArrayList<GradeItem> doInBackground(Void... params) {
@@ -50,11 +86,16 @@ public class WelcomeActivity extends AppCompatActivity {
         }
         protected void onPostExecute(ArrayList<GradeItem> curGrade) {
             waitDialog.dismiss();
-            Intent i = new Intent(getApplicationContext(), CurGradeActivity.class);
-            Log.d("oncreate",curGrade.size()+"");
-            setBaseLine(curGrade);
-            i.putParcelableArrayListExtra("grades", curGrade);
-            startActivity(i);
+            if (curGrade!=null){
+                Intent i = new Intent(getApplicationContext(), CurGradeActivity.class);
+                //Log.d("oncreate",curGrade.size()+"");
+                setBaseLine(curGrade);
+                i.putParcelableArrayListExtra("grades", curGrade);
+                startActivity(i);
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "fetch grade failed", Toast.LENGTH_SHORT).show();
+            }
         }
     }
     public void setBaseLine(ArrayList<GradeItem> grades){
@@ -63,8 +104,9 @@ public class WelcomeActivity extends AppCompatActivity {
         //clear all
         SharedPreferences sharedPref = getSharedPreferences(GradeNotificationService.GradePrefName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
+        int curRunning = sharedPref.getInt("running",0);
         editor.clear();editor.commit();
-
+        editor.putInt("running",curRunning);
         //store the current stuff
         for (GradeItem grade : grades) {
             if (!grade.getGrade().equals("")) {
@@ -85,6 +127,15 @@ public class WelcomeActivity extends AppCompatActivity {
         waitDialog.show();
         getGrades();
     }
+
+    public void signOut(View view){
+        Auth.CredentialsApi.disableAutoSignIn(mGoogleApiClient);
+        Intent intent = new Intent(view.getContext(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
     private void getGrades(){
 
         String url="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";

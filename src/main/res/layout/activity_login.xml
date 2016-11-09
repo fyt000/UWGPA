@@ -22,7 +22,8 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:hint="@string/questid" />
+            android:hint="@string/questid"
+            android:visibility="invisible" />
 
         <EditText
             android:layout_width="match_parent"
@@ -33,7 +34,8 @@
             android:layout_below="@+id/IDText"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:hint="Password" />
+            android:hint="Password"
+            android:visibility="invisible" />
 
         <Button
             android:layout_width="wrap_content"
@@ -44,7 +46,8 @@
             android:layout_centerHorizontal="true"
             android:onClick="login"
             android:textColor="@color/colorAccent"
-            android:background="@color/colorPrimary" />
+            android:background="@color/colorPrimary"
+            android:visibility="invisible" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -68,4 +71,15 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="55dp"
             android:textColor="@color/colorPrimaryDark" />
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/loginButton"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/waitProgressBar"
+            tools:visibility="visible"
+            android:visibility="visible"
+            android:indeterminate="true" />
+
 </RelativeLayout>

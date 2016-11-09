@@ -10,9 +10,16 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.CredentialRequest;
+import com.google.android.gms.auth.api.credentials.CredentialRequestResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -63,7 +70,28 @@ public class GradeNotificationService extends IntentService {
     private void handleActionPoll() {
 
         //if password is missing - need to login again
-        if (password.equals("")||username.equals("")){
+        if (password.equals("")||username.equals("")) {
+            GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Auth.CREDENTIALS_API)
+                    .build();
+            mGoogleApiClient.blockingConnect(5, TimeUnit.SECONDS);
+            if (mGoogleApiClient.isConnected()) {
+                CredentialRequest request = new CredentialRequest.Builder()
+                        .setSupportsPasswordLogin(true)
+                        .build();
+
+                CredentialRequestResult credentialReq = Auth.CredentialsApi.request(mGoogleApiClient, request).await(5, TimeUnit.SECONDS);
+                if (credentialReq.getStatus().isSuccess()) {
+                    Credential credential = credentialReq.getCredential();
+                    password=credential.getPassword();
+                    username=credential.getId();
+                }
+
+            }
+        }
+        boolean showNotification=true; //TODO set this to false on production
+        ArrayList<GradeItem> grades = pullGrade(); //sync requests to get grades
+        if (grades==null) {
             final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setContentTitle("Grade poll service reset")
                     .setAutoCancel(true)
@@ -79,12 +107,6 @@ public class GradeNotificationService extends IntentService {
             final NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(NOTIFICATION_ID, builder.build());
         }
-        //check so that notification start is not triggered twice
-        //make it a toggle
-        boolean showNotification=true;
-        ArrayList<GradeItem> grades = pullGrade(); //sync requests to get grades
-        if (grades==null)
-            return;
 
         SharedPreferences sharedPref = getSharedPreferences(GradePrefName, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -126,9 +148,12 @@ public class GradeNotificationService extends IntentService {
         manager.notify(NOTIFICATION_ID, builder.build());
     }
 
+    public static ResponseData tryLogin(String username,String password){
+        if (username==null||username.equals("")||password==null||password.equals("")){
+            ResponseData response = new ResponseData(400,"Failed",false);
+            return response;
+        }
 
-    public static ArrayList<GradeItem> pullGrade(){
-        ArrayList<GradeItem> grades=null;
         String loginUrl="https://quest.pecs.uwaterloo.ca/psp/SS/?cmd=login&languageCd=ENG";
         PostData postData = new PostData();
         postData.add("httpPort","");postData.add("timezoneOffset","240");postData.add("userid",username.toUpperCase());
@@ -138,10 +163,24 @@ public class GradeNotificationService extends IntentService {
         String gradeUrl="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";
         ResponseData response= PostRequestSync.Post(gradeUrl,"","GET");
         if (response.responseContent.indexOf("DERIVED_SSTSNAV_PERSON_NAME")==-1){ //login failed
-            return grades;
+            response.passed=false;
+            return response;
         }
+        response.passed=true;
+        return response;
+    }
+
+
+    public static ArrayList<GradeItem> pullGrade(){
+        ArrayList<GradeItem> grades=null;
+
+
+        ResponseData response = tryLogin(username,password);
+        if (!response.passed)
+            return null;
         Log.d("notification","logged in");
         //forgot why, but do it again
+        String gradeUrl="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";
         response= PostRequestSync.Post(gradeUrl,"","GET");
         //now find the index
         //I can't just use index 0 or 1 - it just may not be the term
@@ -178,7 +217,7 @@ public class GradeNotificationService extends IntentService {
         String indexStr = dumbScraper.backwardScrape("id='TERM_CAR$","'>"+lookupStr);
         if (indexStr.isEmpty())
             return grades;
-        postData = QuestHeader.GetGradeFormData(response.responseContent,indexStr);
+        PostData postData = QuestHeader.GetGradeFormData(response.responseContent,indexStr);
         response=PostRequestSync.Post("https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL",
                 postData.toString());
         grades=WelcomeActivity.gradeParsing(response.responseContent);
