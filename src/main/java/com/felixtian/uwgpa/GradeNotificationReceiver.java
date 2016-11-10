@@ -17,7 +17,7 @@ public class GradeNotificationReceiver extends WakefulBroadcastReceiver {
 
         AlarmManager alarmManager = (AlarmManager)context.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),quartersToTrigger*AlarmManager.INTERVAL_FIFTEEN_MINUTES,pendingIntent);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),AlarmManager.INTERVAL_FIFTEEN_MINUTES/5,pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),AlarmManager.INTERVAL_FIFTEEN_MINUTES,pendingIntent);
     }
     public static void cancel(Context context){
         AlarmManager alarmManager = (AlarmManager)(context.getApplicationContext().getSystemService(Context.ALARM_SERVICE));
