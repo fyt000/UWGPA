@@ -16,6 +16,8 @@ import com.google.android.gms.auth.api.credentials.CredentialRequest;
 import com.google.android.gms.auth.api.credentials.CredentialRequestResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -65,10 +67,14 @@ public class GradeNotificationService extends IntentService {
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.
-     * Not sure if it safe to pass username and pw around
      */
     private void handleActionPoll() {
+        Log.d("notification","fired to do work");
 
+        if (CookieHandler.getDefault()==null){
+            CookieManager cookieManager = new CookieManager();
+            CookieHandler.setDefault(cookieManager);
+        }
         //if password is missing - need to login again
         if (password.equals("")||username.equals("")) {
             GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -76,20 +82,29 @@ public class GradeNotificationService extends IntentService {
                     .build();
             mGoogleApiClient.blockingConnect(5, TimeUnit.SECONDS);
             if (mGoogleApiClient.isConnected()) {
+                Log.d("googleCred","connected");
                 CredentialRequest request = new CredentialRequest.Builder()
+                        .setPasswordLoginSupported(true)
                         .setSupportsPasswordLogin(true)
                         .build();
 
                 CredentialRequestResult credentialReq = Auth.CredentialsApi.request(mGoogleApiClient, request).await(5, TimeUnit.SECONDS);
                 if (credentialReq.getStatus().isSuccess()) {
+                    Log.d("googleCred","successfully received");
                     Credential credential = credentialReq.getCredential();
                     password=credential.getPassword();
                     username=credential.getId();
+                    //Log.d("googleCred","username "+username);
                 }
-
+                else{
+                    Log.d("googleCred","did not receive "+credentialReq.getStatus().getStatusCode());
+                }
+            }
+            else{
+                Log.d("googleCred","did not connect");
             }
         }
-        boolean showNotification=true; //TODO set this to false on production
+        boolean showNotification=false; //TODO set this to false on production
         ArrayList<GradeItem> grades = pullGrade(); //sync requests to get grades
         if (grades==null) {
             final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -106,6 +121,7 @@ public class GradeNotificationService extends IntentService {
 
             final NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(NOTIFICATION_ID, builder.build());
+            return;
         }
 
         SharedPreferences sharedPref = getSharedPreferences(GradePrefName, MODE_PRIVATE);
@@ -115,7 +131,7 @@ public class GradeNotificationService extends IntentService {
         //check if there is an update
         for (GradeItem grade : grades) {
             String curGrade = sharedPref.getString(grade.getCourseCode(),null);
-            if (curGrade==null) { //check if we already have a grade for it
+            if (curGrade==null||curGrade.equals("")) { //check if we already have a grade for it
                 if (!grade.getGrade().equals("")) { //non empty means we got an actual update
                     showNotification = true;
                     notificationSB.append(" ").append(grade.getCourseCode()).append(": ").append(grade.getGrade());
@@ -124,7 +140,7 @@ public class GradeNotificationService extends IntentService {
             }
             editor.putString(grade.getCourseCode(),grade.getGrade());
         }
-
+        editor.commit();
         Log.d("notification","content "+notificationSB.toString());
         if (!showNotification)
             return;
@@ -151,6 +167,7 @@ public class GradeNotificationService extends IntentService {
     public static ResponseData tryLogin(String username,String password){
         if (username==null||username.equals("")||password==null||password.equals("")){
             ResponseData response = new ResponseData(400,"Failed",false);
+            Log.d("notification","try login failed at blank username/password");
             return response;
         }
 
@@ -159,10 +176,12 @@ public class GradeNotificationService extends IntentService {
         postData.add("httpPort","");postData.add("timezoneOffset","240");postData.add("userid",username.toUpperCase());
         postData.add("pwd",password);postData.add("Submit","Sign in");
         PostRequestSync.Post(loginUrl,postData.toString());
-
+        //Log.d("notification",responseData.responseContent);
         String gradeUrl="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";
         ResponseData response= PostRequestSync.Post(gradeUrl,"","GET");
         if (response.responseContent.indexOf("DERIVED_SSTSNAV_PERSON_NAME")==-1){ //login failed
+            Log.d("notification","try login failed at login credential did not work");
+            //Log.d("notification",response.responseContent);
             response.passed=false;
             return response;
         }
@@ -174,10 +193,11 @@ public class GradeNotificationService extends IntentService {
     public static ArrayList<GradeItem> pullGrade(){
         ArrayList<GradeItem> grades=null;
 
-
         ResponseData response = tryLogin(username,password);
-        if (!response.passed)
+        if (!response.passed) {
+            Log.d("notification","try login did not pass");
             return null;
+        }
         Log.d("notification","logged in");
         //forgot why, but do it again
         String gradeUrl="https://quest.pecs.uwaterloo.ca/psc/SS/ACADEMIC/SA/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?Page=SSR_SSENRL_GRADE&Action=A";

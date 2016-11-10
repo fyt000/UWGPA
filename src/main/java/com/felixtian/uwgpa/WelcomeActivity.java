@@ -49,7 +49,7 @@ public class WelcomeActivity extends AppCompatActivity implements
             html = extras.getString("html");
             DumbScraper scraper1 = new DumbScraper(html);
             welcomeView.setText("Hello, "+scraper1.scrape("id='DERIVED_SSTSNAV_PERSON_NAME'>","</span>"));
-            Log.d("parse",scraper1.scrape("<title id='PSPAGETITLE'>","</title>"));
+            //Log.d("parse",scraper1.scrape("<title id='PSPAGETITLE'>","</title>"));
         }
         else{
             backToLoginDialog();
@@ -130,6 +130,7 @@ public class WelcomeActivity extends AppCompatActivity implements
 
     public void signOut(View view){
         Auth.CredentialsApi.disableAutoSignIn(mGoogleApiClient);
+        GradeNotificationReceiver.cancel(this);
         Intent intent = new Intent(view.getContext(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

@@ -12,7 +12,7 @@ public class QuestHeader {
         DumbScraper dumbScraper=new DumbScraper(html);
         postData.add("ICSID",dumbScraper.scrape("<input type='hidden' name='ICSID' id='ICSID' value='","' />"));
         postData.add("ICStateNum",dumbScraper.scrape("<input type='hidden' name='ICStateNum' id='ICStateNum' value='","' />"));
-        Log.d("parse",postData.toString());
+        //Log.d("parse",postData.toString());
         postData.add("ICAJAX","1");
         postData.add("ICNAVTYPEDROPDOWN","0");
         postData.add("ICType","Panel");
