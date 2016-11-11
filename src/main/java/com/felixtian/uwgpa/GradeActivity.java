@@ -92,20 +92,24 @@ public class GradeActivity extends AppCompatActivity {
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                double total=0;
+                double totalGpa=0;
+                double totalGrade=0;
                 int items=0;
                 for (GradeItem grade : gradeItems){
                     try {
                         double gpa = Double.parseDouble(grade.getGPA());
-                        total += gpa;
+                        int actualGrade = Integer.parseInt(grade.getGrade());
+                        totalGpa += gpa;
+                        totalGrade+=actualGrade;
                         items++;
                     }
                     catch (Exception e){
                         //ignore unparseable items
                     }
                 }
-                double avg = total/items;
-                Snackbar.make(view, "Your average gpa "+avg, Snackbar.LENGTH_LONG)
+                double avgGpa = totalGpa/items;
+                double avgGrade=totalGrade/items;
+                Snackbar.make(view, String.format("Your average GPA %.4f, grade %.4f%%",avgGpa,avgGrade), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
