@@ -130,6 +130,7 @@ public class WelcomeActivity extends AppCompatActivity implements
 
     public void signOut(View view){
         Auth.CredentialsApi.disableAutoSignIn(mGoogleApiClient);
+        gradeItems.clear();
         GradeNotificationReceiver.cancel(this);
         Intent intent = new Intent(view.getContext(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -222,10 +223,6 @@ public class WelcomeActivity extends AppCompatActivity implements
                     }
                 });
         alertDialog.show();
-    }
-    public void curGrade(){
-        //pull grade, wrap it in async task
-        //send it to a new CurGradeActivity
     }
 
 }
